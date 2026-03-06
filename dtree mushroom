@@ -1,0 +1,47 @@
+import pandas as pd
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+from sklearn.metrics import accuracy_score, confusion_matrix
+
+df = pd.read_csv('mushroom.csv')
+
+X = df.drop('class', axis=1)
+y = df['class'].map({'e': 0, 'p': 1})
+
+X = X.replace('?', np.nan)
+stalk_root_mode = X['stalk-root'].mode()[0]
+X['stalk-root'] = X['stalk-root'].fillna(stalk_root_mode)
+
+X_encoded = pd.get_dummies(X, drop_first=True)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X_encoded, y, test_size=0.3, random_state=42
+)
+
+print("--- Training Decision Tree ---")
+# Capping depth at 4 so the plot is actually readable!
+tree_model = DecisionTreeClassifier(max_depth=4, random_state=42)
+tree_model.fit(X_train, y_train)
+tree_pred = tree_model.predict(X_test)
+
+print(f"Accuracy: {accuracy_score(y_test, tree_pred) * 100:.2f}%")
+print("\nConfusion Matrix:\n", confusion_matrix(y_test, tree_pred))
+
+print("\nGenerating tree plot...")
+
+# Set up a large figure so the text isn't cramped
+plt.figure(figsize=(20, 10)) 
+
+# Draw the tree
+plot_tree(
+    tree_model, 
+    feature_names=X_train.columns, 
+    class_names=['Edible', 'Poisonous'], 
+    filled=True,      # Colors the boxes based on the predicted class
+    rounded=True,     # Makes the box corners rounded
+    fontsize=10       # Adjust this if the text overlaps
+)
+
+plt.show()
