@@ -1,0 +1,45 @@
+'''
+import pandas as pd
+df = pd.read_csv('enjoysports.csv')
+
+X = df.iloc[:, :-1].values
+y = df.iloc[:, -1].values
+'''
+
+dataset = [
+    ['Sunny', 'Warm', 'Normal', 'Strong', 'Warm', 'Same', 'Yes'],
+    ['Sunny', 'Warm', 'High',   'Strong', 'Warm', 'Same', 'Yes'],
+    ['Rainy', 'Cold', 'High',   'Strong', 'Warm', 'Change', 'No'],
+    ['Sunny', 'Warm', 'High',   'Strong', 'Cool', 'Change', 'Yes']
+]
+
+X = [row[:-1] for row in dataset] 
+y = [row[-1] for row in dataset]  
+
+def train_find_s(features, target):
+    hypothesis = None
+    
+    for i in range(len(target)):
+        if target[i].lower() == 'yes':
+            hypothesis = features[i].copy() 
+            break
+            
+    if hypothesis is None:
+        return "Error: No positive examples found."
+
+    for i in range(len(features)):
+        # We completely ignore negative examples in Find-S
+        if target[i].lower() == 'yes':
+            # Compare each attribute with our current hypothesis
+            for j in range(len(hypothesis)):
+                # If they don't match, generalize with a '?'
+                if features[i][j] != hypothesis[j]:
+                    hypothesis[j] = '?'
+                    
+    return hypothesis
+
+print("--- Training Find-S Algorithm ---")
+final_hypothesis = train_find_s(X, y)
+
+print("\nThe Maximally Specific Hypothesis is:")
+print(final_hypothesis)
